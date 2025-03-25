@@ -10,7 +10,7 @@
 body {
   color: rgb(var(--foreground-rgb));
   background: rgb(var(--background-rgb));
-  opacity: 1:
+  
 }
 
 /* Custom styles for color picker input */

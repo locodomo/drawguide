@@ -453,134 +453,110 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
         height: height * scale,
       });
 
-      // Create a new layer for drawing
+      // Create separate layers for different elements
       const drawingLayer = new Konva.Layer();
-      tempStage.add(drawingLayer);
+      const guideLayer = new Konva.Layer();
+      const referenceLayer = new Konva.Layer();
       
-      // Scale the layer
+      tempStage.add(drawingLayer);
+      tempStage.add(guideLayer);
+      tempStage.add(referenceLayer);
+      
+      // Scale all layers
       drawingLayer.scale({ x: scale, y: scale });
+      guideLayer.scale({ x: scale, y: scale });
+      referenceLayer.scale({ x: scale, y: scale });
 
-      // Add all lines to the temporary stage
-      lines.forEach((line) => {
+      // Draw the guide image if it exists
+      if (guideImage) {
+        const img = new Image();
+        img.src = guideImage;
+        guideLayer.add(
+          new Konva.Image({
+            image: img,
+            width: width * scale,
+            height: height * scale,
+            globalCompositeOperation: 'source-over'
+          })
+        );
+      }
+
+      // Draw the reference image if it exists
+      if (referenceImage) {
+        const img = new Image();
+        img.src = referenceImage;
+        referenceLayer.add(
+          new Konva.Image({
+            image: img,
+            width: width * scale,
+            height: height * scale,
+            globalCompositeOperation: 'source-over'
+          })
+        );
+      }
+
+      // Add all lines to the drawing layer
+      lines.forEach(line => {
         if (line.tool === 'brush' || line.tool === 'eraser') {
-          // For brush and eraser, create lines
-          const konvaLine = new Konva.Line({
-            points: line.points.flatMap((p) => [p.x, p.y]),
-            stroke: line.tool === 'eraser' ? '#ffffff' : line.color,
-            strokeWidth: line.strokeWidth,
-            tension: 0.5,
-            lineCap: 'round',
-            lineJoin: 'round',
-            globalCompositeOperation:
-              line.tool === 'eraser' ? 'destination-out' : 'source-over',
-          });
-          drawingLayer.add(konvaLine);
-        } else if (line.startPoint && line.endPoint) {
-          // For shapes, create appropriate shape based on tool
-          switch (line.tool) {
-            case 'circle': {
-              const radius = Math.sqrt(
-                Math.pow(line.endPoint.x - line.startPoint.x, 2) +
-                Math.pow(line.endPoint.y - line.startPoint.y, 2)
-              );
-              const circle = new Konva.Circle({
-                x: line.startPoint.x,
-                y: line.startPoint.y,
-                radius: radius,
-                stroke: line.color,
-                strokeWidth: line.strokeWidth,
-                fill: 'transparent',
-              });
-              drawingLayer.add(circle);
-              break;
-            }
-            case 'square': {
-              const rect = new Konva.Rect({
-                x: Math.min(line.startPoint.x, line.endPoint.x),
-                y: Math.min(line.startPoint.y, line.endPoint.y),
-                width: Math.abs(line.endPoint.x - line.startPoint.x),
-                height: Math.abs(line.endPoint.y - line.startPoint.y),
-                stroke: line.color,
-                strokeWidth: line.strokeWidth,
-                fill: 'transparent',
-              });
-              drawingLayer.add(rect);
-              break;
-            }
-            case 'triangle': {
-              const width = line.endPoint.x - line.startPoint.x;
-              const height = line.endPoint.y - line.startPoint.y;
-              const points = [
-                line.startPoint.x + width / 2, line.startPoint.y,
-                line.startPoint.x, line.startPoint.y + height,
-                line.startPoint.x + width, line.startPoint.y + height
-              ];
-              const triangle = new Konva.Line({
-                points: points,
-                stroke: line.color,
-                strokeWidth: line.strokeWidth,
-                closed: true,
-                fill: 'transparent',
-              });
-              drawingLayer.add(triangle);
-              break;
-            }
-            case 'hexagon': {
-              const width = line.endPoint.x - line.startPoint.x;
-              const height = line.endPoint.y - line.startPoint.y;
-              const radius = Math.min(Math.abs(width), Math.abs(height)) / 2;
-              const centerX = line.startPoint.x + width / 2;
-              const centerY = line.startPoint.y + height / 2;
-              const points = [];
-              for (let i = 0; i < 6; i++) {
-                const angle = (i * Math.PI) / 3 - Math.PI / 6;
-                points.push(
-                  centerX + radius * Math.cos(angle),
-                  centerY + radius * Math.sin(angle)
-                );
-              }
-              const hexagon = new Konva.Line({
-                points: points,
-                stroke: line.color,
-                strokeWidth: line.strokeWidth,
-                closed: true,
-                fill: 'transparent',
-              });
-              drawingLayer.add(hexagon);
-              break;
-            }
-          }
+          const points = line.points.map(p => ({
+            x: p.x * scale,
+            y: p.y * scale
+          }));
+          drawingLayer.add(
+            new Konva.Line({
+              points: points.flatMap(p => [p.x, p.y]),
+              stroke: line.tool === 'eraser' ? '#fff' : line.color,
+              strokeWidth: line.strokeWidth * scale,
+              tension: 0.5,
+              lineCap: 'round',
+              lineJoin: 'round',
+              globalCompositeOperation: line.tool === 'eraser' ? 'destination-out' : 'source-over'
+            })
+          );
+        } else if (line.tool === 'circle' && line.startPoint && line.endPoint) {
+          const radius = Math.sqrt(
+            Math.pow(line.endPoint.x - line.startPoint.x, 2) +
+            Math.pow(line.endPoint.y - line.startPoint.y, 2)
+          ) * scale;
+          drawingLayer.add(
+            new Konva.Circle({
+              x: line.startPoint.x * scale,
+              y: line.startPoint.y * scale,
+              radius: radius,
+              stroke: line.color,
+              strokeWidth: line.strokeWidth * scale,
+              fill: 'transparent'
+            })
+          );
+        } else if (line.tool === 'square' && line.startPoint && line.endPoint) {
+          const width = (line.endPoint.x - line.startPoint.x) * scale;
+          const height = (line.endPoint.y - line.startPoint.y) * scale;
+          drawingLayer.add(
+            new Konva.Rect({
+              x: line.startPoint.x * scale,
+              y: line.startPoint.y * scale,
+              width: width,
+              height: height,
+              stroke: line.color,
+              strokeWidth: line.strokeWidth * scale,
+              fill: 'transparent'
+            })
+          );
         }
       });
 
-      // Draw current points if any (for active drawing)
-      if (isDrawingRef.current && currentPoints.length > 0) {
-        const currentLine = new Konva.Line({
-          points: currentPoints.flatMap((p) => [p.x, p.y]),
-          stroke: selectedTool === 'eraser' ? '#ffffff' : selectedColor,
-          strokeWidth: strokeWidth,
-          tension: 0.5,
-          lineCap: 'round',
-          lineJoin: 'round',
-          globalCompositeOperation:
-            selectedTool === 'eraser' ? 'destination-out' : 'source-over',
-        });
-        drawingLayer.add(currentLine);
-      }
-
-      // Draw the layer to get the final image
+      // Draw all layers in the correct order
       drawingLayer.draw();
+      guideLayer.draw();
+      referenceLayer.draw();
 
-      // Fill white background on temp canvas
-      tempCtx.fillStyle = '#ffffff';
-      tempCtx.fillRect(0, 0, width * scale, height * scale);
-
-      // Draw the Konva stage onto the temp canvas
+      // Draw the stage to the temporary canvas
+      tempStage.draw();
       tempCtx.drawImage(tempStage.toCanvas(), 0, 0);
 
-      return tempCanvas.toDataURL('image/png', 1.0);
+      return tempCanvas.toDataURL('image/png');
     } catch (error) {
-      console.error('Error creating canvas data URL:', error);
+      console.error('Error generating canvas data URL:', error);
       return null;
     }
   };
@@ -763,15 +739,33 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
           {renderGrid()}
         </Layer>
         
-        <Layer className="drawing-layer">
+        {/* Guide Image Layer */}
+        <Layer>
           {guideImage && image && (
             <KonvaImage
               image={image}
               width={width}
               height={height}
               opacity={0.3}
+              globalCompositeOperation="source-over"
             />
           )}
+        </Layer>
+
+        {/* Reference Image Layer */}
+        <Layer>
+          {referenceImage && (
+            <KonvaImage
+              image={new Image()}
+              width={width}
+              height={height}
+              globalCompositeOperation="source-over"
+            />
+          )}
+        </Layer>
+
+        {/* Drawing Layer */}
+        <Layer>
           {lines.map((line, i) => {
             if (line.tool === 'brush' || line.tool === 'eraser') {
               return (

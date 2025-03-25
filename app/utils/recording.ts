@@ -69,10 +69,7 @@ export class CanvasRecorder {
         transparent: null,
         repeat: 0,
         dither: false,
-        debug: false,
-        optimize: true, // Enable optimization for better quality
-        palette: null, // Use default palette for better color accuracy
-        interlaced: false // Disable interlacing for smoother playback
+        debug: false
       });
 
       // Process each frame with white background

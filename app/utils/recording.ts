@@ -10,7 +10,7 @@ export class CanvasRecorder {
   private isRecording: boolean = false;
   private startTime: number = 0;
   private lastFrameTime: number = 0;
-  private minFrameDelay: number = 50; // Minimum 50ms between frames
+  private minFrameDelay: number = 33; // Minimum 33ms between frames (approximately 30fps)
   private width: number = 460;
   private height: number = 460;
 
@@ -60,13 +60,19 @@ export class CanvasRecorder {
   async generateGif(): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const gif = new GIF({
-        workers: 2,
-        quality: 10,
+        workers: 4,
+        quality: 1,
         width: this.width,
         height: this.height,
         workerScript: '/gif.worker.js',
         background: '#ffffff',
-        transparent: null // Disable transparency
+        transparent: null,
+        repeat: 0,
+        dither: false,
+        debug: false,
+        optimize: true, // Enable optimization for better quality
+        palette: null, // Use default palette for better color accuracy
+        interlaced: false // Disable interlacing for smoother playback
       });
 
       // Process each frame with white background

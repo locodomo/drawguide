@@ -60,6 +60,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
   const [currentPoints, setCurrentPoints] = useState<Point[]>([]);
   const [guideImage, setGuideImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isGifGenerating, setIsGifGenerating] = useState<boolean>(false);
   const [image] = useImage(guideImage || '');
   const [history, setHistory] = useState<DrawingElement[][]>([[]]);
   const [historyStep, setHistoryStep] = useState<number>(0);
@@ -677,14 +678,14 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       setIsRecording(true);
       recorderRef.current.startRecording();
       
-      // Start capturing frames at regular intervals
+      // Start capturing frames at regular intervals (30fps)
       recordingIntervalRef.current = setInterval(() => {
         const dataUrl = getCanvasDataUrlWithoutGrid();
         if (dataUrl) {
           recorderRef.current.addFrame(dataUrl);
           onFrameCapture?.(recorderRef.current.getFrameCount());
         }
-      }, 100);
+      }, 33); // 33ms interval for approximately 30fps
     },
     stopRecording: async () => {
       setIsRecording(false);
@@ -695,15 +696,19 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       }
 
       try {
+        setIsGifGenerating(true);
         const blob = await recorderRef.current.generateGif();
         return URL.createObjectURL(blob);
       } catch (error) {
         console.error('Error generating preview GIF:', error);
         throw error;
+      } finally {
+        setIsGifGenerating(false);
       }
     },
     exportGif: async () => {
       try {
+        setIsGifGenerating(true);
         const blob = await recorderRef.current.generateGif();
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -715,6 +720,8 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
         URL.revokeObjectURL(url);
       } catch (error) {
         console.error('Error exporting GIF:', error);
+      } finally {
+        setIsGifGenerating(false);
       }
     }
   }));
@@ -728,6 +735,11 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
           <div className="text-white">Generating...</div>
+        </div>
+      )}
+      {isGifGenerating && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10">
+          <div className="text-white">Generating GIF...</div>
         </div>
       )}
       <Stage

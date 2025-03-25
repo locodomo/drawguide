@@ -38,6 +38,7 @@ export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
   const [frameCount, setFrameCount] = useState(0);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
 
   // Handle click outside to close dropdown
   useEffect(() => {
@@ -290,19 +291,24 @@ export default function Home() {
     if (canvasRef.current) {
       try {
         setIsRecording(false);
+        setIsGeneratingGif(true);
         const gifUrl = await canvasRef.current.stopRecording();
         setPreviewUrl(gifUrl);
       } catch (error) {
         console.error('Error stopping recording:', error);
+      } finally {
+        setIsGeneratingGif(false);
       }
     }
   };
 
   const handleExportGif = async () => {
     if (canvasRef.current) {
+      setIsGeneratingGif(true);
       await canvasRef.current.exportGif();
       // Close preview after saving
       setPreviewUrl(null);
+      setIsGeneratingGif(false);
     }
   };
 
@@ -492,6 +498,7 @@ export default function Home() {
           gifUrl={previewUrl}
           onClose={handleClosePreview}
           onSave={handleExportGif}
+          isGenerating={isGeneratingGif}
         />
       )}
 

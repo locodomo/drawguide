@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Generation Limits</title>
+</head>
+<body>
+    <h2>Reset Generation Limits</h2>
+    <p id="status">Resetting...</p>
+
+    <script>
+        // Reset immediately when page loads
+        window.onload = function() {
+            try {
+                // Clear all storage first
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                const currentDate = new Date().toDateString();
+                
+                // Reset specific values in localStorage with proper initialization
+                localStorage.setItem('lastGenerationTime', '0');
+                localStorage.setItem('dailyGenerationCount', '0');
+                localStorage.setItem('lastGeneratedDate', currentDate);
+                
+                // Log the reset values
+                console.log('Local Storage after reset:', {
+                    lastGenerationTime: localStorage.getItem('lastGenerationTime'),
+                    dailyGenerationCount: localStorage.getItem('dailyGenerationCount'),
+                    lastGeneratedDate: localStorage.getItem('lastGeneratedDate')
+                });
+                
+                document.getElementById('status').textContent = 'Successfully reset generation limits! You can now generate up to 2 images today.';
+            } catch (error) {
+                document.getElementById('status').textContent = 'Error: ' + error.message;
+                console.error('Reset error:', error);
+            }
+        }
+    </script>
+</body>
+</html> 

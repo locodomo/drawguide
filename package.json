@@ -3,22 +3,35 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "canvas": "^3.1.0",
+    "gif.js.optimized": "^1.0.1",
+    "konva": "^9.3.20",
+    "lucide-react": "^0.483.0",
+    "next": "15.2.3",
+    "node-fetch": "^3.3.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.3"
+    "react-konva": "^19.0.3",
+    "replicate": "^1.0.1",
+    "simplify-js": "^1.2.4",
+    "svg-path-parser": "^1.1.0",
+    "use-image": "^1.1.1",
+    "vercel": "^41.4.1"
   },
   "devDependencies": {
-    "typescript": "^5",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4"
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.4.35",
+    "postcss-import": "^16.1.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
 }

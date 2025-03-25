@@ -31,6 +31,7 @@ export interface DrawingCanvasRef {
   generateAIStrokes: (prompt: string) => Promise<{ imageUrl: string }>;
   loadReferenceImage: (imageUrl: string) => void;
   getCanvas: () => HTMLCanvasElement | null;
+  getCanvasDataUrlWithoutGrid: (scale?: number) => string | null;
   startRecording: () => void;
   stopRecording: () => Promise<string>;
   exportGif: () => Promise<void>;
@@ -653,9 +654,15 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       setGuideImage(null);
       
       const img = new Image();
+      img.crossOrigin = "anonymous";
       img.onload = () => {
         // Set the guide image
         setGuideImage(imageUrl);
+      };
+      img.onerror = () => {
+        // Handle CORS errors
+        console.error('Failed to load image due to CORS restrictions');
+        setGuideImage(null);
       };
       img.src = imageUrl;
     },
@@ -665,6 +672,7 @@ const DrawingCanvas = forwardRef<DrawingCanvasRef, DrawingCanvasProps>(({
       }
       return null;
     },
+    getCanvasDataUrlWithoutGrid: getCanvasDataUrlWithoutGrid,
     startRecording: () => {
       setIsRecording(true);
       recorderRef.current.startRecording();

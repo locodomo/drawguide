@@ -93,9 +93,12 @@ export default function Home() {
       localStorage.removeItem('lastGeneratedDate');
       setDailyCount(0);
       setLastGeneratedDate(null);
+      setIsGenerationLimited(false);
     } else {
       setDailyCount(storedDailyCount);
       setLastGeneratedDate(storedLastGenerated);
+      // Set generation limit based on stored count
+      setIsGenerationLimited(storedDailyCount >= 2);
     }
 
     // Check limits after initializing state
@@ -131,19 +134,21 @@ export default function Home() {
       // Reset count for new day
       setDailyCount(1);
       localStorage.setItem('dailyGenerationCount', '1');
+      setIsGenerationLimited(false);
     } else {
       // Increment count for current day
       const newDailyCount = dailyCount + 1;
       setDailyCount(newDailyCount);
       localStorage.setItem('dailyGenerationCount', String(newDailyCount));
+      
+      // Set generation limit if reached
+      if (newDailyCount >= 2) {
+        setIsGenerationLimited(true);
+      }
     }
     
     setLastGeneratedDate(currentDate);
     localStorage.setItem('lastGeneratedDate', currentDate);
-    
-    // Check and update limitation status
-    const limits = checkGenerationLimits();
-    setIsGenerationLimited(limits.hasReachedLimit);
   };
 
   interface MangaStyle {
@@ -152,7 +157,7 @@ export default function Home() {
   }
 
   const mangaStyles: MangaStyle[] = [
-    { value: '', label: 'Pick a category' },
+    { value: '', label: 'Select a category' },
     { value: 'shounen', label: 'Shounen (Action/Adventure)' },
     { value: 'shoujo', label: 'Shoujo (Romance/Drama)' },
     { value: 'seinen', label: 'Seinen (Mature/Realistic)' },
@@ -211,37 +216,61 @@ export default function Home() {
     if (!canvasRef.current) return;
 
     try {
-      // Get the canvas data URL
-      const canvas = canvasRef.current.getCanvas();
-      if (!canvas) return;
-      
-      const dataUrl = canvas.toDataURL('image/png');
+      // Get the canvas data URL at 4x resolution without grid and generated image
+      const dataUrl = canvasRef.current.getCanvasDataUrlWithoutGrid(4);
+      if (!dataUrl) {
+        throw new Error('Failed to generate image data');
+      }
       
       // Create sharing text
       const shareText = 'Check out my drawing made with DrawGuide!';
       
       // Handle different platforms
       switch (platform) {
-        case 'twitter':
+        case 'twitter': {
+          // Create a temporary link to download the image
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'drawing.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Open Twitter with the text
           window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`);
           break;
+        }
         case 'threads':
-          // Threads doesn't have a web share API yet, so we'll copy to clipboard
-          await navigator.clipboard.writeText(shareText);
-          alert('Image copied! You can now paste it in Threads.');
+        case 'instagram': {
+          // Save the image first
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'drawing.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Show instructions
+          alert(`Image saved! You can now upload it to ${platform === 'threads' ? 'Threads' : 'Instagram'}.`);
           break;
-        case 'instagram':
-          // Instagram doesn't have a web share API, so we'll copy to clipboard
-          await navigator.clipboard.writeText(shareText);
-          alert('Image copied! You can now paste it in Instagram.');
-          break;
-        case 'pinterest':
+        }
+        case 'pinterest': {
+          // Save the image first
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'drawing.png';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Open Pinterest with the URL
           window.open(`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(window.location.href)}&description=${encodeURIComponent(shareText)}`);
           break;
+        }
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      setError('Failed to share image');
+      setError('Failed to share image. Please try saving the image first and then sharing it manually.');
     }
   };
 
@@ -354,15 +383,15 @@ export default function Home() {
                       setError(null);
                     }}
                     placeholder="Describe what you want to draw or..."
-                    className="px-2.5 py-1 border rounded-lg w-full text-xs"
+                    className="px-2.5 py-1 border rounded-lg w-full text-xs text-black"
                   />
                   <div className="relative" ref={dropdownRef}>
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                       className="px-2.5 py-1 border rounded-lg bg-white w-full text-xs text-left flex items-center justify-between"
                     >
-                      <span className="truncate">
-                        {selectedStyle ? mangaStyles.find(style => style.value === selectedStyle)?.label || 'Pick a category' : 'Pick a category'}
+                      <span className="truncate text-gray-900">
+                        {selectedStyle ? mangaStyles.find(style => style.value === selectedStyle)?.label || 'Select a category' : 'Select a category'}
                       </span>
                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -377,7 +406,7 @@ export default function Home() {
                               setSelectedStyle(style.value);
                               setIsDropdownOpen(false);
                             }}
-                            className="flex items-center w-full px-3 py-2 text-left hover:bg-gray-50 text-xs"
+                            className="flex items-center w-full px-3 py-2 text-left hover:bg-gray-50 text-xs text-gray-900"
                           >
                             <span>{style.label}</span>
                           </button>

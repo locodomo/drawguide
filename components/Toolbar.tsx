@@ -115,7 +115,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         />
         <button
           onClick={() => onToolSelect('brush')}
-          className={`p-1 rounded-lg hover:bg-gray-100 ${
+          className={`p-1 rounded-lg hover:bg-gray-100 text-gray-900 ${
             selectedTool === 'brush' ? 'bg-orange-100' : ''
           }`}
           title="Brush"
@@ -124,7 +124,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         </button>
         <button
           onClick={() => onToolSelect('eraser')}
-          className={`p-1 rounded-lg hover:bg-gray-100 ${
+          className={`p-1 rounded-lg hover:bg-gray-100 text-gray-900 ${
             selectedTool === 'eraser' ? 'bg-orange-100' : ''
           }`}
           title="Eraser"
@@ -134,7 +134,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
         <div className="relative">
           <button
             onClick={() => setIsShapesDropdownOpen(!isShapesDropdownOpen)}
-            className={`p-1 rounded-lg hover:bg-gray-100 ${
+            className={`p-1 rounded-lg hover:bg-gray-100 text-gray-900 ${
               ['circle', 'square', 'triangle', 'hexagon'].includes(selectedTool) ? 'bg-orange-100' : ''
             }`}
             title="Shapes"
@@ -153,7 +153,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                       onToolSelect(shape.value as ToolType);
                       setIsShapesDropdownOpen(false);
                     }}
-                    className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 text-xs ${
+                    className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 text-xs text-gray-900 ${
                       selectedTool === shape.value ? 'bg-orange-50' : ''
                     }`}
                   >
@@ -170,7 +170,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="relative">
         <button
           onClick={() => setIsStrokeSettingsOpen(!isStrokeSettingsOpen)}
-          className={`p-1 rounded-lg hover:bg-gray-100 ${
+          className={`p-1 rounded-lg hover:bg-gray-100 text-gray-900 ${
             isStrokeSettingsOpen ? 'bg-orange-100' : ''
           }`}
           title="Stroke Width"
@@ -222,7 +222,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
               setIsGridSettingsOpen(true);
             }
           }}
-          className={`p-1 rounded-lg hover:bg-gray-100 ${
+          className={`p-1 rounded-lg hover:bg-gray-100 text-gray-900 ${
             showGrid ? 'bg-orange-100' : ''
           }`}
           title="Toggle Grid"
@@ -262,21 +262,21 @@ const Toolbar: React.FC<ToolbarProps> = ({
       <div className="flex gap-2 ml-auto">
         <button
           onClick={onUndo}
-          className="p-1 rounded-lg hover:bg-gray-100"
+          className="p-1 rounded-lg hover:bg-gray-100 text-gray-900"
           title="Undo"
         >
           <Undo2 size={16} />
         </button>
         <button
           onClick={onRedo}
-          className="p-1 rounded-lg hover:bg-gray-100"
+          className="p-1 rounded-lg hover:bg-gray-100 text-gray-900"
           title="Redo"
         >
           <Redo2 size={16} />
         </button>
         <button
           onClick={onSaveImage}
-          className="p-1 rounded-lg hover:bg-gray-100"
+          className="p-1 rounded-lg hover:bg-gray-100 text-gray-900"
           title="Save Image"
         >
           <Save size={16} />
@@ -351,7 +351,7 @@ const Toolbar: React.FC<ToolbarProps> = ({
                       if (onShare) onShare(option.platform);
                       setIsShareDropdownOpen(false);
                     }}
-                    className="flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 text-xs"
+                    className={`flex items-center gap-2 w-full px-3 py-2 text-left hover:bg-gray-50 text-xs text-gray-900`}
                   >
                     <Icon size={16} />
                     <span>{option.label}</span>
